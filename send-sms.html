@@ -1,0 +1,90 @@
+<script type="text/x-red" data-template-name="send-sms">
+    <div class="form-row" id="node-input-elks-row">
+        <label for="node-input-twilio"><i class="fa fa-user"></i> 46elks config</label>
+        <input type="text" id="node-input-elks">
+    </div>
+    <div class="form-row">
+        <label for="node-input-message"><i class="fa fa-edit"></i> Message</label>
+        <input type="text" id="node-input-message" placeholder="payload">
+    </div>
+    <div class="form-row">
+        <label for="node-input-numbers"><i class="fa fa-mobile" style="font-size:160%"></i> Numbers</label>
+        <input type="text" id="node-input-numbers" placeholder="topic">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    </script>
+    
+    
+    <script type="text/x-red" data-template-name="elksConfig">
+        <div class="form-row">
+            <label for="node-config-input-user"><i class="fa fa-user"></i> User</label>
+            <input type="text" id="node-config-input-user">
+        </div>
+        <div class="form-row">
+            <label for="node-config-input-password"><i class="fa fa-lock"></i> Password</label>
+            <input type="password" id="node-config-input-password">
+        </div>
+        <div class="form-row">
+            <label for="node-config-input-from"><i class="fa fa-envelope"></i> From</label>
+            <input type="text" id="node-config-input-from">
+        </div>
+    </script>
+    
+    
+    <script type="text/x-red" data-help-name="send-sms">
+      Send SMS messages using the 46elks service.
+      <hr/>
+      <p><b>Send SMS node</b></p>
+      <code>Message</code> Text to be sent. If left empty it will use <i>msg.payload.message</i>
+      <br/>
+      <code>Numbers</code> Comma separated list of mobile numbers. Defaults to <i>msg.payload.numbers</i>
+      <p><b>Config</b></p>
+      <code>User</code> API username
+      <br/>
+      <code>Password</code> API password
+      <br/>
+      <code>From</code> The sender of the SMS as seen by the recipient. Either a text sender ID or a phone number in E.164 format if you want to be able to receive replies.  
+    </script>
+    
+    
+    <script type="text/javascript">
+      RED.nodes.registerType('send-sms', {
+        category: 'mobile',
+        defaults: {
+            name: {value:"Send Sms"},
+            message: {},
+            numbers: {},
+            elks: {type:"elksConfig"}
+        },
+        color: "#161552",
+        inputs: 1,
+        outputs: 0,
+        icon: "elks.png",
+        align: "right",
+        label: function() {
+          return this.name || this.title || 'Send SMS'
+        },
+        labelStyle: function() {
+          return this.name ? "node_label_italic" : "";
+        },
+      })
+    
+      RED.nodes.registerType('elksConfig', {
+          category: 'config',
+          defaults: {
+              name: { value: "elksConfig"}
+          },
+          credentials: {
+            user: {type: "text", required: true},
+            password: {type: "text", required: true},
+            from: {type: "text", required: true}
+          },
+          label: function() {
+              return this.name;
+          }
+      })
+    
+    </script>

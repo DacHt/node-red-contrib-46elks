@@ -7,17 +7,22 @@
     "nodes": {
         "send-sms": "send-sms.js"
     }
-  }, 
+  },
+  "bundleDependencies": false, 
   "keywords": [
     "node-red",
     "sms",
     "mms",
     "46elks"
   ],
-  "author": "David Rozenbeek",
+  "author": {
+    "name": "David Rozenbeek",
+    "email": "david.rozenbeek@gmail.com"
+  },
+  "homepage": "https://github.com/DacHt/node-red-contrib-46elks",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/DacHt/node-red-contrib-46elks"
   }
 }
