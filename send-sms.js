@@ -1,50 +1,47 @@
+var https = require('https')
+var querystring = require('querystring')
+  
 module.exports = function (RED) {
     
-    var https = require('https')
-    var querystring = require('querystring')
-    
-    const callback = (response) => {
-        var str = ''
-        response.on('data', (chunk) => {
-            str += chunk
-        })
-    
-        response.on('end', () => {
-            this.warn(str)
-        })
-    }
     
     function elksSMS(node, number, text) {
-        node.warn("Now in elksSMS")
-        postFields = {
+        var postData = querystring.stringify ({
             from: node.elks.credentials.from,
             to: number,
-            message: text
-        }
-        node.warn(node.elks.credentials.user + ':' + node.elks.credentials.password)
-        key = new Buffer(node.elks.credentials.user + ':' + node.elks.credentials.password).toString('base64')
-        postData = querystring.stringify(postFields)
-
-        options = {
-            hostname: 'api.46elks.com',
-            path:     '/a1/SMS',
-            method:   'POST',
-            headers:  {
-                'Authorization': 'Basic ' + key
-            }
-        }
-        node.warn(options)
-        
-        // Start the web request.
-        var request = https.request(options, callback)
-
+            message: text,
+            whendelivered: "http://knottebo.ddns.net:2269/red/sms"
+        })
         node.warn(postData)
         
+        var postOptions = {
+            host: 'api.46elks.com',
+            path:     '/a1/SMS',
+            method:   'POST',
+            auth: node.elks.credentials.user + ':' + node.elks.credentials.password,
+            headers:  {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Content-Length': Buffer.byteLength(postData)
+            }
+        }
+        node.warn(postOptions)
+        
+        // Start the web request.
+        var post_req = https.request(postOptions, function(response) {
+            var str = ''
+            response.on('data', (chunk) => {
+                str += chunk
+            })
+        
+            response.on('end', () => {
+                node.warn(str)
+            })
+        })
+        
         // Send the real data away to the server.
-        request.write(postData)
+        post_req.write(postData)
 
         // Finish sending the request.
-        request.end()
+        post_req.end()
     }
   
     function sendSMS(node, msg) {
