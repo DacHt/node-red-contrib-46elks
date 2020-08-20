@@ -12,10 +12,6 @@
         <input type="text" id="node-input-numbers" placeholder="topic">
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
-    </div>
-    <div class="form-row">
         <label for="node-input-dryrun"><i class="fa fa-bell-slash"></i> Dryrun?</label>
         <input type="checkbox" id="node-input-dryrun">
     </div>
@@ -26,6 +22,10 @@
     <div class="form-row">
         <label for="node-input-dontlog"><i class="fa fa-book"></i> Don't Log?</label>
         <input type="checkbox" id="node-input-dontlog">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
     </div>
 </script>
     
@@ -57,6 +57,12 @@
     <code>Message</code> Text to be sent. If left empty it will use <i>msg.payload.message</i>
     <br/>
     <code>Numbers</code> Comma separated list of mobile numbers. Defaults to <i>msg.payload.numbers</i>
+    <br/>
+    <code>Dryrun?</code> Enable when you want to verify your API request without actually sending an SMS to a mobile phone. No SMS message will be sent when this is enabled.
+    <br/>
+    <code>Flash SMS?</code> Send the message as a Flash SMS. The message will be displayed immediately upon arrival and not stored.
+    <br/>
+    <code>Don't Log?</code> Enable to avoid storing the message text in your history. The other parameters will still be stored.
     <p><b>Config</b></p>
     <code>User</code> API username
     <br/>
@@ -64,7 +70,7 @@
     <br/>
     <code>From</code> The sender of the SMS as seen by the recipient. Either a text sender ID or a phone number in E.164 format if you want to be able to receive replies.  
     <br/>
-    <code>feedback URL (optional)</code> Optional URL that the 46Elks API post a feedback message of the SMS request.   
+    <code>feedback URL (optional)</code> Optional webhook URL that will receive a POST request every time the delivery status changes.   
 </script>
 
 
