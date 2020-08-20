@@ -15,83 +15,98 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
-    </script>
+    <div class="form-row">
+        <label for="node-input-dryrun"><i class="fa fa-bell-slash"></i> Dryrun?</label>
+        <input type="checkbox" id="node-input-dryrun">
+    </div>
+    <div class="form-row">
+        <label for="node-input-flashsms"><i class="fa fa-bolt"></i> Flash SMS?</label>
+        <input type="checkbox" id="node-input-flashsms">
+    </div>
+    <div class="form-row">
+        <label for="node-input-dontlog"><i class="fa fa-book"></i> Don't Log?</label>
+        <input type="checkbox" id="node-input-dontlog">
+    </div>
+</script>
     
     
-    <script type="text/x-red" data-template-name="elksConfig">
-        <div class="form-row">
-            <label for="node-config-input-user"><i class="fa fa-user"></i> User</label>
-            <input type="text" id="node-config-input-user">
-        </div>
-        <div class="form-row">
-            <label for="node-config-input-password"><i class="fa fa-lock"></i> Password</label>
-            <input type="password" id="node-config-input-password">
-        </div>
-        <div class="form-row">
-            <label for="node-config-input-from"><i class="fa fa-user-circle"></i> From</label>
-            <input type="text" id="node-config-input-from" placeholder="Max 11 characters!">
-        </div>
-        <div class="form-row">
-            <label for="node-config-input-feedbackurl"><i class="fa fa-envelope"></i> Feedback URL</label>
-            <input type="text" id="node-config-input-feedbackurl" placeholder="Optional">
-        </div>
-    </script>
-    
-    
-    <script type="text/x-red" data-help-name="send-sms">
-      Send SMS messages using the 46elks service.
-      <hr/>
-      <p><b>Send SMS node</b></p>
-      <code>Message</code> Text to be sent. If left empty it will use <i>msg.payload.message</i>
-      <br/>
-      <code>Numbers</code> Comma separated list of mobile numbers. Defaults to <i>msg.payload.numbers</i>
-      <p><b>Config</b></p>
-      <code>User</code> API username
-      <br/>
-      <code>Password</code> API password
-      <br/>
-      <code>From</code> The sender of the SMS as seen by the recipient. Either a text sender ID or a phone number in E.164 format if you want to be able to receive replies.  
-      <br/>
-      <code>feedback URL (optional)</code> Optional URL that the 46Elks API post a feedback message of the SMS request.   
-    </script>
-    
-    
-    <script type="text/javascript">
-      RED.nodes.registerType('send-sms', {
-        category: 'mobile',
+<script type="text/x-red" data-template-name="elksConfig">
+    <div class="form-row">
+        <label for="node-config-input-user"><i class="fa fa-user"></i> User</label>
+        <input type="text" id="node-config-input-user">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-password"><i class="fa fa-lock"></i> Password</label>
+        <input type="password" id="node-config-input-password">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-from"><i class="fa fa-user-circle"></i> From</label>
+        <input type="text" id="node-config-input-from" placeholder="Max 11 characters!">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-feedbackurl"><i class="fa fa-envelope"></i> Feedback URL</label>
+        <input type="text" id="node-config-input-feedbackurl" placeholder="Optional">
+    </div>
+</script>
+
+
+<script type="text/x-red" data-help-name="send-sms">
+    Send SMS messages using the 46elks service.
+    <hr/>
+    <p><b>Send SMS node</b></p>
+    <code>Message</code> Text to be sent. If left empty it will use <i>msg.payload.message</i>
+    <br/>
+    <code>Numbers</code> Comma separated list of mobile numbers. Defaults to <i>msg.payload.numbers</i>
+    <p><b>Config</b></p>
+    <code>User</code> API username
+    <br/>
+    <code>Password</code> API password
+    <br/>
+    <code>From</code> The sender of the SMS as seen by the recipient. Either a text sender ID or a phone number in E.164 format if you want to be able to receive replies.  
+    <br/>
+    <code>feedback URL (optional)</code> Optional URL that the 46Elks API post a feedback message of the SMS request.   
+</script>
+
+
+<script type="text/javascript">
+    RED.nodes.registerType('send-sms', {
+    category: 'mobile',
+    defaults: {
+        name: {value:"Send Sms"},
+        message: {},
+        numbers: {},
+        dryrun: {},
+        flashsms: {},
+        dontlog: {},
+        elks: {type:"elksConfig"}
+    },
+    color: "#161552",
+    inputs: 1,
+    outputs: 0,
+    icon: "elks.png",
+    align: "right",
+    label: function() {
+        return this.name || this.title || 'Send SMS'
+    },
+    labelStyle: function() {
+        return this.name ? "node_label_italic" : "";
+    },
+    })
+
+    RED.nodes.registerType('elksConfig', {
+        category: 'config',
         defaults: {
-            name: {value:"Send Sms"},
-            message: {},
-            numbers: {},
-            elks: {type:"elksConfig"}
+        name: {value: "elksConfig"},
+        from: {type: "text", required: true},
+        feedbackURL: {type: "text", required: false},
         },
-        color: "#161552",
-        inputs: 1,
-        outputs: 0,
-        icon: "elks.png",
-        align: "right",
+        credentials: {
+        user: {type: "text", required: true},
+        password: {type: "text", required: true},        
+        },
         label: function() {
-          return this.name || this.title || 'Send SMS'
-        },
-        labelStyle: function() {
-          return this.name ? "node_label_italic" : "";
-        },
-      })
-    
-      RED.nodes.registerType('elksConfig', {
-          category: 'config',
-          defaults: {
-            name: {value: "elksConfig"},
-            from: {type: "text", required: true},
-            feedbackURL: {type: "text", required: false},
-          },
-          credentials: {
-            user: {type: "text", required: true},
-            password: {type: "text", required: true},        
-          },
-          label: function() {
-              return this.name;
-          }
-      })
-    
-    </script>
+            return this.name;
+        }
+    })
+
+</script>
