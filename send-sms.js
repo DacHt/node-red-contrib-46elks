@@ -6,25 +6,24 @@ module.exports = function (RED) {
     
     function elksSMS(node, number, text) {
         var postData = querystring.stringify ({
-            from: node.elks.credentials.from,
+            from: node.elks.from,
             to: number,
-            message: text,
-            whendelivered: "http://knottebo.ddns.net:2269/red/sms"
+            message: text
+            //whendelivered: node.elks.feedbackURL
         })
         node.warn(postData)
         
+        var key = new Buffer(node.elks.credentials.user + ':' + node.elks.credentials.password).toString('base64')
         var postOptions = {
-            host: 'api.46elks.com',
+            hostname: 'api.46elks.com',
             path:     '/a1/SMS',
             method:   'POST',
-            auth: node.elks.credentials.user + ':' + node.elks.credentials.password,
             headers:  {
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'Content-Length': Buffer.byteLength(postData)
+              'Authorization': 'Basic ' + key
             }
         }
         node.warn(postOptions)
-        
+
         // Start the web request.
         var post_req = https.request(postOptions, function(response) {
             var str = ''
@@ -47,7 +46,6 @@ module.exports = function (RED) {
     function sendSMS(node, msg) {
       //Array.prototype.push.apply(node.buffer, makeNumberMessagePairs(node, msg))
       //var elem = node.buffer.shift();
-      node.warn("Now in sendSMS")
       elksSMS(node, node.numbers, node.message);
     }
   
@@ -65,6 +63,8 @@ module.exports = function (RED) {
       this.name = config.name
       this.user = config.user
       this.password = config.password
+      this.from = config.from    
+      this.feedbackURL = config.feedbackURL
     }
   
     RED.nodes.registerType("send-sms", SendSmsNode)
@@ -75,12 +75,15 @@ module.exports = function (RED) {
         },
         password: {
           type: "text"
-        },
-        from: {
-          type: "text"
         }
+      },
+      from: {
+          type: "text"
+      },
+      feedbackURL: {
+        type: "text"
       }
-    })
+      })
   
   }
   

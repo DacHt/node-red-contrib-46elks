@@ -28,8 +28,12 @@
             <input type="password" id="node-config-input-password">
         </div>
         <div class="form-row">
-            <label for="node-config-input-from"><i class="fa fa-envelope"></i> From</label>
-            <input type="text" id="node-config-input-from">
+            <label for="node-config-input-from"><i class="fa fa-user-circle"></i> From</label>
+            <input type="text" id="node-config-input-from" placeholder="Max 11 characters!">
+        </div>
+        <div class="form-row">
+            <label for="node-config-input-feedbackurl"><i class="fa fa-envelope"></i> Feedback URL</label>
+            <input type="text" id="node-config-input-feedbackurl" placeholder="Optional">
         </div>
     </script>
     
@@ -47,6 +51,8 @@
       <code>Password</code> API password
       <br/>
       <code>From</code> The sender of the SMS as seen by the recipient. Either a text sender ID or a phone number in E.164 format if you want to be able to receive replies.  
+      <br/>
+      <code>feedback URL (optional)</code> Optional URL that the 46Elks API post a feedback message of the SMS request.   
     </script>
     
     
@@ -75,12 +81,13 @@
       RED.nodes.registerType('elksConfig', {
           category: 'config',
           defaults: {
-              name: { value: "elksConfig"}
+            name: {value: "elksConfig"},
+            from: {type: "text", required: true},
+            feedbackURL: {type: "text", required: false},
           },
           credentials: {
             user: {type: "text", required: true},
-            password: {type: "text", required: true},
-            from: {type: "text", required: true}
+            password: {type: "text", required: true},        
           },
           label: function() {
               return this.name;
