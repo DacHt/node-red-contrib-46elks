@@ -12,7 +12,6 @@
   "keywords": [
     "node-red",
     "sms",
-    "mms",
     "46elks"
   ],
   "author": {
@@ -23,6 +22,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DacHt/node-red-contrib-46elks"
+    "url": "git+https://github.com/DacHt/node-red-contrib-46elks.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DacHt/node-red-contrib-46elks/issues"
   }
 }

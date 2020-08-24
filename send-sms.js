@@ -27,7 +27,7 @@ var querystring = require('querystring')
  
 module.exports = function (RED) {
     
-    var return_str = ''
+    var return_msg = []
     var return_msg_recived = false
 
     function elksSMS(node, number, text) { 
@@ -64,9 +64,9 @@ module.exports = function (RED) {
           response.on('end', () => {
             //node.warn(str)
             if (node.buffer.length === 0) {
-            return_msg_recived = true  
-            }
-            return_str += str
+              return_msg_recived = true  
+            } 
+            return_msg.push(JSON.parse(str))
           })
       })
 
@@ -149,15 +149,16 @@ module.exports = function (RED) {
         while(!return_msg_recived) {
             if(return_msg_recived) {
               break
-            } else if((Date.now() - time_now_ms) > 1000) {
-              return_str = "No response from server, return msg time out."
+            } else if((Date.now() - time_now_ms) > 10000) {
+              return_msg.push(JSON.parse("{ 'err': 'No response from server!'}"))
               break
             }
         }
         
-        msg.payload = return_str
+        msg.payload = return_msg 
         send(msg)
-                 
+        return_msg = ''
+
         if(done) {
           done();
         }
