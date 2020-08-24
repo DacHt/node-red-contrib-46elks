@@ -62,8 +62,11 @@ module.exports = function (RED) {
           })
       
           response.on('end', () => {
+            //node.warn(str)
+            if (node.buffer.length === 0) {
             return_msg_recived = true  
-            return_str = str
+            }
+            return_str += str
           })
       })
 
@@ -74,7 +77,33 @@ module.exports = function (RED) {
       post_req.end()
 
     }
- 
+    
+
+    function getMsgProps(msg, props) {
+      return props.split(".").reduce(function (obj, i) {
+        return obj[i]
+      }, msg)
+    }
+
+    function makeNumberMessagePairs(node, msg) {
+      var message = node.message;
+      var numbers = node.numbers;
+      if (!message) {
+        message = getMsgProps(msg, 'payload.message')
+      }
+      if (!numbers) {
+        numbers = getMsgProps(msg, 'payload.numbers').split(",")
+      } else {
+        numbers = numbers.split(",")
+      }
+      return numbers.map(function (elem) {
+        return {
+          to: elem,
+          text: message
+        }
+      })
+    }
+
     function SendSmsNode(config) {
       RED.nodes.createNode(this, config)
       let node = this
@@ -84,19 +113,43 @@ module.exports = function (RED) {
       this.dryrun = config.dryrun
       this.flashsms = config.flashsms
       this.dontlog = config.dontlog
+      this.throttle = config.throttle || 0
+      this.buffer = []
+      this.intervalID = -1 
       this.on("input", function(msg, send, done) {
-        //Array.prototype.push.apply(node.buffer, makeNumberMessagePairs(node, msg))
-        //var elem = node.buffer.shift();
-        
         send = send || function() { node.send.apply(node,arguments) }
+        Array.prototype.push.apply(node.buffer, makeNumberMessagePairs(node, msg))
         
-        elksSMS(node, node.numbers, node.message);
+        // if timer already running there is nothing to do
+        if (node.intervalID !== -1) {
+          return;
+        }
+        
+        node.intervalID = setInterval(function () {
+          if (node.buffer.length === 0) {
+            clearInterval(node.intervalID)
+            node.intervalID = -1
+            node.status({
+              text: 'Done',
+              fill: 'green',
+              shape: 'dot'
+            })
+          } else {
+            node.status({
+                text: node.buffer.length + ' pending',
+                fill: 'grey',
+                shape: 'dot'
+              })
+            var elem = node.buffer.shift()
+            elksSMS(node, elem.to, elem.text)           
+          }
+        }, node.throttle)
         
         var time_now_ms = Date.now();
         while(!return_msg_recived) {
             if(return_msg_recived) {
               break
-            } else if((Date.now() - time_now_ms) > 20000) {
+            } else if((Date.now() - time_now_ms) > 1000) {
               return_str = "No response from server, return msg time out."
               break
             }
@@ -108,6 +161,10 @@ module.exports = function (RED) {
         if(done) {
           done();
         }
+      })
+      this.on("close", function () {
+        clearInterval(this.intervalID)
+        this.buffer = []
       })
     }
   
@@ -131,7 +188,7 @@ module.exports = function (RED) {
         }
       },
       from: {
-          type: "text"
+        type: "text"
       },
       feedbackURL: {
         type: "text"

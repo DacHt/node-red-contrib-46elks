@@ -30,11 +30,11 @@ SOFTWARE.
     </div>
     <div class="form-row">
         <label for="node-input-message"><i class="fa fa-edit"></i> Message</label>
-        <input type="text" id="node-input-message" placeholder="payload">
+        <input type="text" id="node-input-message" placeholder="payload.message">
     </div>
     <div class="form-row">
         <label for="node-input-numbers"><i class="fa fa-mobile" style="font-size:160%"></i> Numbers</label>
-        <input type="text" id="node-input-numbers" placeholder="topic">
+        <input type="text" id="node-input-numbers" placeholder="payload.numbers">
     </div>
     <div class="form-row">
         <label for="node-input-dryrun"><i class="fa fa-bell-slash"></i> Dryrun?</label>
@@ -47,6 +47,10 @@ SOFTWARE.
     <div class="form-row">
         <label for="node-input-dontlog"><i class="fa fa-book"></i> Don't Log?</label>
         <input type="checkbox" id="node-input-dontlog">
+    </div>
+    <div class="form-row">
+        <label for="node-input-throttle"><i class="fa fa-tachometer"></i> Throttle</label>
+        <input type="number" id="node-input-throttle" placeholder="1000">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
@@ -88,6 +92,8 @@ SOFTWARE.
     <code>Flash SMS?</code> Send the message as a Flash SMS. The message will be displayed immediately upon arrival and not stored.
     <br/>
     <code>Don't Log?</code> Enable to avoid storing the message text in your history. The other parameters will still be stored.
+    <br/>
+    <code>Throttle</code> Number of milliseconds to wait between messages.
     <p><b>Config</b></p>
     <code>User</code> API username
     <br/>
@@ -109,6 +115,7 @@ SOFTWARE.
         dryrun: {},
         flashsms: {},
         dontlog: {},
+        throttle: {value:1000},
         elks: {type:"elksConfig"}
     },
     color: "#161552",
