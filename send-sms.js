@@ -22,15 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ******************************************************************************/
 
-var https = require('https')
-var querystring = require('querystring')
- 
-module.exports = function (RED) {
-    
-    var return_msg = []
-    var return_msg_recived = false
+var https = require('https');
+var querystring = require('querystring');
 
-    function elksSMS(node, number, text) { 
+module.exports = function (RED) {
+    "use strict"
+    async function elksSMS(node, number, text, send, msg) { 
 
       var postData = querystring.stringify ({
           from: node.elks.from,
@@ -40,10 +37,9 @@ module.exports = function (RED) {
           flashsms: node.flashsms?"yes":"no",
           dontlog: node.dontlog?"message":"",
           whendelivered: node.elks.feedbackURL
-      })
-      //node.warn(postData)
+      });
       
-      var key = new Buffer(node.elks.credentials.user + ':' + node.elks.credentials.password).toString('base64')
+      var key = new Buffer(node.elks.credentials.user + ':' + node.elks.credentials.password).toString('base64');
       var postOptions = {
           hostname: 'api.46elks.com',
           path:     '/a1/SMS',
@@ -51,74 +47,75 @@ module.exports = function (RED) {
           headers:  {
             'Authorization': 'Basic ' + key
           }
-      }
-      //node.warn(postOptions)
+      };
       
       // Start the web request.
-      var post_req = https.request(postOptions, function(response) {
-          var str = ''
-          response.on('data', (chunk) => {
-              str += chunk
-          })
-      
-          response.on('end', () => {
-            //node.warn(str)
-            if (node.buffer.length === 0) {
-              return_msg_recived = true  
-            } 
-            return_msg.push(JSON.parse(str))
-          })
-      })
+      var return_msg = await postRequest();
+    
+      function postRequest() {
+        return new Promise(resolve => {
+            var post_req = https.request(postOptions, function(response) {
+              var str = '';
+              response.on('data', (chunk) => {
+                  str += chunk;
+              })
+          
+              response.on('end', () => {
+                resolve(str);
+              });
+            });
+            // Send the real data away to the server.
+            post_req.write(postData);
 
-      // Send the real data away to the server.
-      post_req.write(postData)
-
-      // Finish sending the request.
-      post_req.end()
-
+            // Finish sending the request.
+            post_req.end();
+          });
+      }
+      msg.payload = return_msg;
+      send(msg);
     }
     
 
     function getMsgProps(msg, props) {
       return props.split(".").reduce(function (obj, i) {
-        return obj[i]
-      }, msg)
+        return obj[i];
+      }, msg);
     }
 
     function makeNumberMessagePairs(node, msg) {
       var message = node.message;
       var numbers = node.numbers;
       if (!message) {
-        message = getMsgProps(msg, 'payload.message')
+        message = getMsgProps(msg, 'payload.message');
       }
       if (!numbers) {
-        numbers = getMsgProps(msg, 'payload.numbers').split(",")
+        numbers = getMsgProps(msg, 'payload.numbers').split(",");
       } else {
-        numbers = numbers.split(",")
+        numbers = numbers.split(",");
       }
       return numbers.map(function (elem) {
         return {
           to: elem,
           text: message
-        }
-      })
+        };
+      });
     }
 
     function SendSmsNode(config) {
-      RED.nodes.createNode(this, config)
-      let node = this
-      this.elks = RED.nodes.getNode(config.elks)
-      this.message = config.message
-      this.numbers = config.numbers
-      this.dryrun = config.dryrun
-      this.flashsms = config.flashsms
-      this.dontlog = config.dontlog
-      this.throttle = config.throttle || 0
-      this.buffer = []
-      this.intervalID = -1 
+      RED.nodes.createNode(this, config);
+      let node = this;
+      this.elks = RED.nodes.getNode(config.elks);
+      this.message = config.message;
+      this.numbers = config.numbers;
+      this.dryrun = config.dryrun;
+      this.flashsms = config.flashsms;
+      this.dontlog = config.dontlog;
+      this.throttle = config.throttle || 0;
+      this.buffer = [];
+      this.intervalID = -1;
       this.on("input", function(msg, send, done) {
-        send = send || function() { node.send.apply(node,arguments) }
-        Array.prototype.push.apply(node.buffer, makeNumberMessagePairs(node, msg))
+        send = send || function() { node.send.apply(node,arguments) };
+        Array.prototype.push.apply(node.buffer, makeNumberMessagePairs(node, msg));
         
         // if timer already running there is nothing to do
         if (node.intervalID !== -1) {
@@ -127,58 +124,47 @@ module.exports = function (RED) {
         
         node.intervalID = setInterval(function () {
           if (node.buffer.length === 0) {
-            clearInterval(node.intervalID)
-            node.intervalID = -1
+            clearInterval(node.intervalID);
+            node.intervalID = -1;
             node.status({
               text: 'Done',
               fill: 'green',
               shape: 'dot'
-            })
+            });
           } else {
             node.status({
                 text: node.buffer.length + ' pending',
                 fill: 'grey',
                 shape: 'dot'
-              })
-            var elem = node.buffer.shift()
-            elksSMS(node, elem.to, elem.text)           
+              });
+            var elem = node.buffer.shift();
+            elksSMS(node, elem.to, elem.text, send, msg);         
           }
-        }, node.throttle)
+        }, node.throttle);
         
-        var time_now_ms = Date.now();
-        while(!return_msg_recived) {
-            if(return_msg_recived) {
-              break
-            } else if((Date.now() - time_now_ms) > 10000) {
-              return_msg.push(JSON.parse("{ 'err': 'No response from server!'}"))
-              break
-            }
-        }
-        
-        msg.payload = return_msg 
-        send(msg)
-        return_msg = ''
 
         if(done) {
           done();
         }
-      })
+      });
+
       this.on("close", function () {
-        clearInterval(this.intervalID)
-        this.buffer = []
-      })
+        clearInterval(this.intervalID);
+        this.buffer = [];
+      });
     }
-  
+    
+    RED.nodes.registerType("send-sms", SendSmsNode);
+    
     function elksConfigNode(config) {
-      RED.nodes.createNode(this, config)
-      this.name = config.name
-      this.user = config.user
-      this.password = config.password
-      this.from = config.from    
-      this.feedbackURL = config.feedbackURL
+      RED.nodes.createNode(this, config);
+      this.name = config.name;
+      this.user = config.user;
+      this.password = config.password;
+      this.from = config.from;
+      this.feedbackURL = config.feedbackURL;
     }
   
-    RED.nodes.registerType("send-sms", SendSmsNode)
     RED.nodes.registerType("elksConfig", elksConfigNode, {
       credentials: {
         user: {
@@ -194,7 +180,7 @@ module.exports = function (RED) {
       feedbackURL: {
         type: "text"
       }
-      })
+      });
   
   }
   
