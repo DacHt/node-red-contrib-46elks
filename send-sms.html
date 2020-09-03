@@ -80,12 +80,12 @@ SOFTWARE.
 
 
 <script type="text/x-red" data-help-name="send-sms">
-    Send SMS messages using the 46elks service.
+    Send SMS messages using the 46elks API.
     <hr/>
     <p><b>Send SMS node</b></p>
     <code>Message</code> Text to be sent. If left empty it will use <i>msg.payload.message</i>
     <br/>
-    <code>Numbers</code> Comma separated list of mobile numbers. Defaults to <i>msg.payload.numbers</i>
+    <code>Numbers</code> Comma separated list of mobile numbers in <a href="https://46elks.com/kb/e164"> E.164</a>. Defaults to <i>msg.payload.numbers</i>
     <br/>
     <code>Dryrun?</code> Enable when you want to verify your API request without actually sending an SMS to a mobile phone. No SMS message will be sent when this is enabled.
     <br/>
@@ -93,16 +93,23 @@ SOFTWARE.
     <br/>
     <code>Don't Log?</code> Enable to avoid storing the message text in your history. The other parameters will still be stored.
     <br/>
-    <code>Throttle</code> Number of milliseconds to wait between messages.
-    <p><b>Config</b></p>
+    <code>Throttle</code> Number of milliseconds to wait between messages. 
+</script>
+
+
+<script type="text/x-red" data-help-name="elksConfig">
+    <p><b>46elks Config</b></p>
+    Start with signing up for an account at <a href="https://46elks.com/register-get-account">https://46elks.com/register-get-account</a>
+    <hr/>
     <code>User</code> API username
     <br/>
     <code>Password</code> API password
     <br/>
-    <code>From</code> The sender of the SMS as seen by the recipient. Either a text sender ID or a phone number in E.164 format if you want to be able to receive replies.  
+    <code>From</code> The sender of the SMS as seen by the recipient. Either a text sender ID or a phone number in <a href="https://46elks.com/kb/e164"> E.164</a> format if you want to be able to receive replies.  
     <br/>
-    <code>feedback URL (optional)</code> Optional webhook URL that will receive a POST request every time the delivery status changes.   
+    <code>Feedback URL (optional)</code> Optional webhook URL that will receive a POST request every time the delivery status changes.   
 </script>
+
 
 
 <script type="text/javascript">
