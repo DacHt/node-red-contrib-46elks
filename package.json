@@ -2,7 +2,7 @@
   "name": "node-red-contrib-46elks",
   "version": "0.1.0",
   "deprecated": false,
-  "description": "Node for using the 46elks' SMS/MMS API",
+  "description": "Node for using the 46elks' SMS API",
   "node-red" : {
     "nodes": {
         "send-sms": "send-sms.js"

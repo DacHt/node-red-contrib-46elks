@@ -71,7 +71,7 @@ module.exports = function (RED) {
             post_req.end();
           });
       }
-      msg.payload = return_msg;
+      msg.payload = JSON.parse(return_msg);
       send(msg);
     }
     
